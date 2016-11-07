@@ -97,10 +97,13 @@ def to_csr(mat):
     cols = []
     vals = []
     rowstart = []
-    for col in mat:
+    row_num = 1
+    for row in mat:
         col_num = 1
         rowstarted = False
-        for val in col:
+        for val in row:
+            if row_num == col_num and mat[row_num - 1][col_num - 1] == 0:
+                    return [5] #STOP - zero on diagonal
             if val != 0:
                 vals.append(val)
                 cols.append(col_num)
@@ -108,6 +111,7 @@ def to_csr(mat):
                     rowstart.append(len(vals))
                     rowstarted = True
             col_num+=1
+        row_num+=1
     rowstart.append(len(vals)+1) #final value
     csr.append(vals)
     csr.append(cols)
@@ -115,6 +119,9 @@ def to_csr(mat):
     return csr
 
 def sparse_sor(A, b, n, maxits, x, x_seq_tol, res_tol, w=1.25):
+    if A == [5]: #STOP - zero on diagonal
+            set_output([], 5, maxits, 0, x_seq_tol, res_tol)
+            return
     k = 1
     reason = 6 #something has gone wrong if this does not get overwritten later
     xold = np.array([0.0])
@@ -132,8 +139,6 @@ def sparse_sor(A, b, n, maxits, x, x_seq_tol, res_tol, w=1.25):
                 sum = sum + Anp[0][j] * xnew[j - (Anp[2][i]-1) + first_nz]
                 if Anp[1][j] == i+1:
                     d = A[0][j]
-                    if d== 0:
-                        reason=5
             xnew[i] = xnew[i] + w * (bnp[i] - sum) / d   
         k+=1
     conv = chk_converge(Anp, xnew, bnp, xold, x_seq_tol, res_tol, False)
