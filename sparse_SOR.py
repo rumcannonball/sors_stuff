@@ -39,15 +39,16 @@ def get_x_seq(xold, xnew):
     """
     return get_Euclid(np.subtract(xnew, xold))
 
-def chk_diverge(xold, xnew):
+def chk_diverge(xold, xnew, A, b):
     """
     check if previous approx of x was closer than new approx of x
     """
-    """
-    I tried a couple of ideas here but they all had problems.
-    Research required to establish a good method for checking divergence.
-    """
-    return False
+    dist_old = get_residual(A, xold, b)
+    dist_new = get_residual(A, xnew, b)
+    if dist_old < dist_new:
+        return True
+    else:
+        return False
 
 def chk_converge(A, xnew, b, xold, x_seq_tol, res_tol, flag):
     #checks both residual and x_seq for convergence 
@@ -57,7 +58,7 @@ def chk_converge(A, xnew, b, xold, x_seq_tol, res_tol, flag):
         return 2 #dict value for this stopping reason
     elif get_x_seq(xold, xnew) < x_seq_tol:
         return 1
-    elif chk_diverge(xold, xnew) == True:
+    elif chk_diverge(xold, xnew, A, b) == True:
         return 4
     return -1
 
